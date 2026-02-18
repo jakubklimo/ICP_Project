@@ -1,0 +1,32 @@
+# ===== Build directories =====
+build/
+cmake-build-*/
+out/
+
+# ===== CMake files =====
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+
+# ===== Compiled binaries =====
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.dylib
+*.exe
+app
+
+# ===== macOS =====
+.DS_Store
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.code-workspace
+
+# ===== vcpkg =====
+vcpkg_installed/
