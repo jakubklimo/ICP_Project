@@ -6,6 +6,7 @@ static Camera* camera = nullptr;
 static Shader* shader = nullptr;
 static Mesh* triangleMesh = nullptr;
 static Object* triangle = nullptr;
+static World* world = nullptr;
 
 static int mvpLocation = -1;
 
@@ -93,9 +94,17 @@ bool Renderer::init()
     };
 
     triangleMesh = new Mesh(vertices, sizeof(vertices));
-    triangle = new Object(triangleMesh);
+    
+    world = new World();
 
-    triangle->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    triangle = new Object(triangleMesh);
+    triangle->setPosition(glm::vec3(-0.5f, 0.0f, 0.0f));
+
+    Object* triangle2 = new Object(triangleMesh);
+    triangle2->setPosition(glm::vec3(0.5f, 0.0f, 0.0f));
+
+    world->addObject(triangle);
+    world->addObject(triangle2);
 
     std::cout << "Renderer initialized, window created\n";
     return true;
@@ -109,27 +118,29 @@ void Renderer::beginFrame()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     float time = glfwGetTime();
-    triangle->setRotation(glm::vec3(0.0f, time, 0.0f));
 
     shader->use();
-
-    // Model
-    glm::mat4 model = triangle->getModelMatrix();
 
     glm::mat4 view = camera->getViewMatrix();
     glm::mat4 projection = camera->getProjectionMatrix();
 
-    // MVP
-    glm::mat4 mvp = projection * view * model;
+    for (auto obj : world->getObjects())
+    {
+        // jednoduchá animace
+        obj->setRotation(glm::vec3(0.0f, time, 0.0f));
 
-    // Send to shader
-    shader->use();
-    glUniformMatrix4fv(mvpLocation,
-                    1,
-                    GL_FALSE,
-                    glm::value_ptr(mvp));
+        glm::mat4 model = obj->getModelMatrix();
+        glm::mat4 mvp = projection * view * model;
 
-    triangle->draw();
+        glUniformMatrix4fv(
+            mvpLocation,
+            1,
+            GL_FALSE,
+            glm::value_ptr(mvp)
+        );
+
+        obj->draw();
+    }
 }
 
 void Renderer::endFrame()

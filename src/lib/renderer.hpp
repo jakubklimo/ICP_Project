@@ -10,6 +10,7 @@
 #include "camera.hpp"
 #include "mesh.hpp"
 #include "object.hpp"
+#include "world.hpp"
 
 class Renderer {
     public:
