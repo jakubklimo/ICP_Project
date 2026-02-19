@@ -20,6 +20,8 @@ class Renderer {
         static void beginFrame();
         static void endFrame();
 
+        static void render();
+
         static bool shouldClose();
         static GLFWwindow* getWindow();
 

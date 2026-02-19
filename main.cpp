@@ -4,12 +4,22 @@
 
 int main()
 {
-    if (!Renderer::init()) {
-        return -1;
-    }
+    Renderer::init();
 
-    while (!Renderer::shouldClose()) {
-        Renderer::beginFrame();
+    World::init();
+
+    float lastFrame = 0.0f;
+
+    while (!Renderer::shouldClose())
+    {
+        float currentFrame = glfwGetTime();
+        float delta = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        glfwPollEvents();
+
+        World::update(delta);
+        Renderer::render();
 
         Renderer::endFrame();
     }
