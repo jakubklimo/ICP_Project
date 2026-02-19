@@ -3,8 +3,34 @@
 
 GLFWwindow* Renderer::window = nullptr;
 
+static bool firstMouse = true;
+static float lastX = 400, lastY = 300;
+
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
+}
+
+static void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+
+    lastX = xpos;
+    lastY = ypos;
+
+    World::getCamera()->processMouse(xoffset, yoffset);
+}
+
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    World::getCamera()->processScroll((float)yoffset);
 }
 
 bool Renderer::init()
@@ -38,6 +64,13 @@ bool Renderer::init()
         std::cerr << "GLEW init failed\n";
         return false;
     }
+
+    glEnable(GL_DEPTH_TEST);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);

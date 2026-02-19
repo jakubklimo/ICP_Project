@@ -18,6 +18,8 @@ int main()
 
         glfwPollEvents();
 
+        World::getCamera()->processKeyboard(Renderer::getWindow(), delta);
+
         World::update(delta);
         Renderer::render();
 
