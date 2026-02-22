@@ -12,15 +12,15 @@ int main()
 
     while (!Renderer::shouldClose())
     {
+        Renderer::beginFrame();
+
         float currentFrame = glfwGetTime();
         float delta = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        glfwPollEvents();
-
+        World::update(delta);
         World::getCamera()->processKeyboard(Renderer::getWindow(), delta);
 
-        World::update(delta);
         Renderer::render();
 
         Renderer::endFrame();

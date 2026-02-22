@@ -6,6 +6,62 @@ GLFWwindow* Renderer::window = nullptr;
 static bool firstMouse = true;
 static float lastX = 400, lastY = 300;
 
+static bool isFullscreen = false;
+static bool vsyncEnabled = true;
+
+static int savedPosX = 0;
+static int savedPosY = 0;
+static int savedWidth = 800;
+static int savedHeight = 600;
+
+static void toggleFullscreen(GLFWwindow* window)
+{
+    isFullscreen = !isFullscreen;
+
+    if (isFullscreen)
+    {
+        glfwGetWindowPos(window, &savedPosX, &savedPosY);
+        glfwGetWindowSize(window, &savedWidth, &savedHeight);
+
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        glfwSetWindowMonitor(
+            window,
+            monitor,
+            0,
+            0,
+            mode->width,
+            mode->height,
+            mode->refreshRate
+        );
+    }
+    else
+    {
+        glfwSetWindowMonitor(
+            window,
+            nullptr,
+            savedPosX,
+            savedPosY,
+            savedWidth,
+            savedHeight,
+            0
+        );
+    }
+
+    firstMouse = true;
+}
+
+static void toggleVSync()
+{
+    vsyncEnabled = !vsyncEnabled;
+    glfwSwapInterval(vsyncEnabled ? 1 : 0);
+
+    std::cout << "VSync: " 
+              << (vsyncEnabled ? "ON" : "OFF") 
+              << std::endl;
+}
+
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }
@@ -31,6 +87,22 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     World::getCamera()->processScroll((float)yoffset);
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_PRESS)
+    {
+        if (key == GLFW_KEY_F) {
+            toggleFullscreen(window);
+        }
+        if (key == GLFW_KEY_V) {
+            toggleVSync();
+        }
+        if (key == GLFW_KEY_ESCAPE) {
+            glfwSetWindowShouldClose(window, true);
+        }
+    }
 }
 
 bool Renderer::init()
@@ -65,12 +137,15 @@ bool Renderer::init()
         return false;
     }
 
+    GUI::init(window);
+
     glEnable(GL_DEPTH_TEST);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -86,10 +161,15 @@ void Renderer::beginFrame()
 
     glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    GUI::beginFrame();
 }
 
 void Renderer::endFrame()
 {
+    GUI::render();
+    GUI::endFrame();
+
     glfwSwapBuffers(window);
 }
 
@@ -134,6 +214,8 @@ GLFWwindow* Renderer::getWindow()
 
 void Renderer::shutdown()
 {
+    GUI::shutdown();
+
     glfwDestroyWindow(window);
     glfwTerminate();
 }

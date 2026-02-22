@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <glm/glm.hpp>
 
 #include "object.hpp"
 #include "mesh.hpp"

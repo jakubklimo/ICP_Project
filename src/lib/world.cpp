@@ -15,19 +15,13 @@ void World::init()
         "resources/shaders/fragment.glsl"
     );
 
-    float vertices[] = {
-        0.0f,  0.5f, 0.0f,
-       -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f
-    };
+    Model* cube = new Model("resources/obj/cube.obj");
 
-    Mesh* mesh = new Mesh(vertices, sizeof(vertices));
+    Object* obj1 = new Object(cube);
+    obj1->setPosition(glm::vec3(-1.0f, 0.0f, 0.0f));
 
-    Object* obj1 = new Object(mesh);
-    obj1->setPosition(glm::vec3(-0.5f, 0.0f, 0.0f));
-
-    Object* obj2 = new Object(mesh);
-    obj2->setPosition(glm::vec3(0.5f, 0.0f, 0.0f));
+    Object* obj2 = new Object(cube);
+    obj2->setPosition(glm::vec3(1.0f, 0.0f, 0.0f));
 
     objects.push_back(obj1);
     objects.push_back(obj2);
