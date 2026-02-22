@@ -19,7 +19,7 @@ int main()
         lastFrame = currentFrame;
 
         World::update(delta);
-        World::getCamera()->processKeyboard(Renderer::getWindow(), delta);
+        Renderer::getCamera()->processKeyboard(Renderer::getWindow(), delta);
 
         Renderer::render();
 

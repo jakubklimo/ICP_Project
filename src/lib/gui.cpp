@@ -18,6 +18,7 @@ void GUI::beginFrame(){
 }
 
 void GUI::render(){
+    ImGui::SetNextWindowSize(ImVec2(200, 160), ImGuiCond_Always);
     ImGui::Begin("ICP Debug Panel");
 
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
@@ -36,6 +37,10 @@ void GUI::render(){
         profileStr = "Compatibility";
 
     ImGui::Text("Profile: %s", profileStr);
+
+    ImGui::Text("Fullscreen: %s", Renderer::isFullscreen() ? "YES" : "NO");
+    ImGui::Text("VSync: %s", Renderer::isVSync() ? "ON" : "OFF");
+    ImGui::Text("MSAA: %s", Renderer::isMSAA() ? "ON" : "OFF");
 
     ImGui::End();
 }

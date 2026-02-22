@@ -29,8 +29,32 @@ class Renderer {
         static void renderGUI();
 
         static bool shouldClose();
+
         static GLFWwindow* getWindow();
+        static Camera* getCamera();
+        static Shader* getShader();
+
+        static void toggleFullscreen();
+        static void toggleVSync();
+        static void toggleMSAA();
+
+        static bool isFullscreen();
+        static bool isVSync();
+        static bool isMSAA();
 
     private:
         static GLFWwindow* window;
+        static Camera* camera;
+        static Shader* shader;
+
+        static bool fullscreen;
+        static bool vsync;
+        static bool msaa;
+
+        static int savedPosX;
+        static int savedPosY;
+        static int savedWidth;
+        static int savedHeight;
+
+        static GLint mvpLocation;
 };

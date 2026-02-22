@@ -2,23 +2,30 @@
 #include <iostream>
 
 GLFWwindow* Renderer::window = nullptr;
+Camera* Renderer::camera = nullptr;
+Shader* Renderer::shader = nullptr;
 
 static bool firstMouse = true;
 static float lastX = 400, lastY = 300;
 
-static bool isFullscreen = false;
-static bool vsyncEnabled = true;
+bool Renderer::fullscreen = false;
+bool Renderer::vsync = true;
+bool Renderer::msaa = true;
 
-static int savedPosX = 0;
-static int savedPosY = 0;
-static int savedWidth = 800;
-static int savedHeight = 600;
+int Renderer::savedPosX = 0;
+int Renderer::savedPosY = 0;
+int Renderer::savedWidth = 800;
+int Renderer::savedHeight = 600;
 
-static void toggleFullscreen(GLFWwindow* window)
+GLint Renderer::mvpLocation = -1;
+
+void Renderer::toggleFullscreen()
 {
-    isFullscreen = !isFullscreen;
+    fullscreen = !fullscreen;
 
-    if (isFullscreen)
+    GLFWwindow* window = getWindow();
+
+    if (fullscreen)
     {
         glfwGetWindowPos(window, &savedPosX, &savedPosY);
         glfwGetWindowSize(window, &savedWidth, &savedHeight);
@@ -26,39 +33,44 @@ static void toggleFullscreen(GLFWwindow* window)
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-        glfwSetWindowMonitor(
-            window,
-            monitor,
-            0,
-            0,
-            mode->width,
-            mode->height,
-            mode->refreshRate
-        );
+        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     }
     else
     {
-        glfwSetWindowMonitor(
-            window,
-            nullptr,
-            savedPosX,
-            savedPosY,
-            savedWidth,
-            savedHeight,
-            0
-        );
+        glfwSetWindowMonitor(window, nullptr, savedPosX, savedPosY, savedWidth, savedHeight, 0);
     }
 
     firstMouse = true;
+
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+
+    if (camera)
+        camera->setAspect((float)width / (float)height);
 }
 
-static void toggleVSync()
+void Renderer::toggleVSync()
 {
-    vsyncEnabled = !vsyncEnabled;
-    glfwSwapInterval(vsyncEnabled ? 1 : 0);
+    vsync = !vsync;
+    glfwSwapInterval(vsync ? 1 : 0);
 
     std::cout << "VSync: " 
-              << (vsyncEnabled ? "ON" : "OFF") 
+              << (vsync ? "ON" : "OFF") 
+              << std::endl;
+}
+
+void Renderer::toggleMSAA()
+{
+    msaa = !msaa;
+
+    if (msaa)
+        glEnable(GL_MULTISAMPLE);
+    else
+        glDisable(GL_MULTISAMPLE);
+
+    std::cout << "MSAA: "
+              << (msaa ? "ON" : "OFF")
               << std::endl;
 }
 
@@ -101,12 +113,12 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    World::getCamera()->processMouse(xoffset, yoffset);
+    Renderer::getCamera()->processMouse(xoffset, yoffset);
 }
 
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    World::getCamera()->processScroll((float)yoffset);
+    Renderer::getCamera()->processScroll((float)yoffset);
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -114,16 +126,19 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if (action == GLFW_PRESS)
     {
         if (key == GLFW_KEY_F) {
-            toggleFullscreen(window);
+            Renderer::toggleFullscreen();
         }
         if (key == GLFW_KEY_V) {
-            toggleVSync();
+            Renderer::toggleVSync();
         }
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, true);
         }
         if (key == GLFW_KEY_P) {
             takeScreenshot(window);
+        }
+        if (key == GLFW_KEY_M) {
+            Renderer::toggleMSAA();
         }
     }
 }
@@ -141,6 +156,7 @@ bool Renderer::init()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     window = glfwCreateWindow(800, 600, "ICP Project", nullptr, nullptr);
     if (!window) {
@@ -163,6 +179,7 @@ bool Renderer::init()
     GUI::init(window);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -172,6 +189,23 @@ bool Renderer::init()
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
+
+    float aspect = (float)width / (float)height;
+    camera = new Camera(45.0f, aspect, 0.1f, 100.0f);
+
+    shader = new Shader(
+        "resources/shaders/vertex.glsl",
+        "resources/shaders/fragment.glsl"
+    );
+    shader->use();
+
+    mvpLocation = glGetUniformLocation(shader->getID(), "MVP");
+
+    if (mvpLocation == -1)
+    {
+        std::cout << "Warning: MVP uniform not found!" << std::endl;
+    }
+
     glViewport(0, 0, width, height);
 
     std::cout << "Renderer initialized, window created\n";
@@ -201,9 +235,6 @@ void Renderer::render()
     glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Shader* shader = World::getShader();
-    Camera* camera = World::getCamera();
-
     shader->use();
 
     glm::mat4 view = camera->getViewMatrix();
@@ -215,7 +246,7 @@ void Renderer::render()
         glm::mat4 mvp = projection * view * model;
 
         glUniformMatrix4fv(
-            glGetUniformLocation(shader->getID(), "MVP"),
+            mvpLocation,
             1,
             GL_FALSE,
             glm::value_ptr(mvp)
@@ -237,8 +268,23 @@ GLFWwindow* Renderer::getWindow()
 
 void Renderer::shutdown()
 {
+    delete camera;
+    camera = nullptr;
+
+    delete shader;
+    shader = nullptr;
+
     GUI::shutdown();
 
     glfwDestroyWindow(window);
     glfwTerminate();
 }
+
+Camera* Renderer::getCamera()
+{
+    return camera;
+}
+
+bool Renderer::isFullscreen() { return fullscreen; }
+bool Renderer::isVSync() { return vsync; }
+bool Renderer::isMSAA() { return msaa; }
