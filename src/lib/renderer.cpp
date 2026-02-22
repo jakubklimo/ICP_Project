@@ -62,6 +62,26 @@ static void toggleVSync()
               << std::endl;
 }
 
+static void takeScreenshot(GLFWwindow* window){
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+
+    cv::Mat pixels(height, width, CV_8UC3);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, pixels.data);
+
+    cv::Mat flipped;
+    cv::flip(pixels, flipped, 0);
+
+    std::string filename = "screenshot.png";
+
+    if (cv::imwrite(filename, flipped))
+        std::cout << "Screenshot saved\n";
+    else
+        std::cout << "Screenshot failed\n";
+}
+
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }
@@ -101,6 +121,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         }
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, true);
+        }
+        if (key == GLFW_KEY_P) {
+            takeScreenshot(window);
         }
     }
 }

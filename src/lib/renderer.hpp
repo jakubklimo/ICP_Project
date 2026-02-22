@@ -8,6 +8,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <opencv2/opencv.hpp>
 
 #include "shader.hpp"
 #include "camera.hpp"
