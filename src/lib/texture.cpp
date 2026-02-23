@@ -3,7 +3,7 @@
 
 Texture::Texture(const std::string& path)
 {
-    cv::Mat image = cv::imread(path, cv::IMREAD_COLOR);
+    cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
 
     if (image.empty())
     {
@@ -16,7 +16,21 @@ Texture::Texture(const std::string& path)
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_2D, ID);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.cols, image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data);
+    GLenum internalFormat;
+    GLenum dataFormat;
+
+    if (image.channels() == 4)
+    {
+        internalFormat = GL_RGBA;
+        dataFormat = GL_BGRA;
+    }
+    else
+    {
+        internalFormat = GL_RGB;
+        dataFormat = GL_BGR;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.cols, image.rows, 0, dataFormat, GL_UNSIGNED_BYTE, image.data);
 
     glGenerateMipmap(GL_TEXTURE_2D);
 

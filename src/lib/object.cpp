@@ -1,7 +1,8 @@
 #include "object.hpp"
 
-Object::Object(Model* model, Material* material) : model(model), material(material), position(0.0f), rotation(0.0f)
-{}
+Object::Object(Model* model, Material* material) : model(model), material(material), position(0.0f), rotation(0.0f) {}
+
+Object::Object(Mesh* mesh, Material* material) : mesh(mesh), material(material) {}
 
 void Object::setPosition(const glm::vec3& pos)
 {
@@ -29,7 +30,10 @@ glm::mat4 Object::getModelMatrix() const
 void Object::draw() const
 {
     material->bind();
-    model->draw();
+    if (model)
+        model->draw();
+    else if (mesh)
+        mesh->draw();
 }
 
 Material* Object::getMaterial() const

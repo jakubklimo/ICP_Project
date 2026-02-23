@@ -1,10 +1,10 @@
 #include "camera.hpp"
 
 Camera::Camera(float fov, float aspect, float near, float far)
-    : position(0.0f, 0.0f, 3.0f),
+    : position(0.0f, 5.0f, 5.0f),
       worldUp(0.0f, 1.0f, 0.0f),
       yaw(-90.0f),
-      pitch(0.0f),
+      pitch(-20.0f),
       movementSpeed(5.0f),
       mouseSensitivity(0.1f),
       fov(fov),
@@ -78,4 +78,9 @@ void Camera::updateVectors()
 
     right = glm::normalize(glm::cross(front, worldUp));
     up = glm::normalize(glm::cross(right, front));
+}
+
+glm::vec3 Camera::getPosition() const
+{
+    return position;
 }

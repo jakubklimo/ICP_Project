@@ -18,14 +18,15 @@ int main()
         float delta = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        World::update(delta);
         Renderer::getCamera()->processKeyboard(Renderer::getWindow(), delta);
+        World::update(delta);
 
         Renderer::render();
 
         Renderer::endFrame();
     }
 
+    World::shutdown();
     Renderer::shutdown();
     return 0;
 }

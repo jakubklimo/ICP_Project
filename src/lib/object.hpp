@@ -11,6 +11,7 @@ class Model;
 class Object {
     public:
         Object(Model* model, Material* material);
+        Object(Mesh* mesh, Material* material);
 
         void setPosition(const glm::vec3& pos);
         void setRotation(const glm::vec3& rot);
@@ -23,6 +24,7 @@ class Object {
     private:
         Model* model;
         Material* material;
+        Mesh* mesh;
 
         glm::vec3 position;
         glm::vec3 rotation;
