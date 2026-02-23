@@ -5,6 +5,8 @@
 
 #include "object.hpp"
 #include "mesh.hpp"
+#include "material.hpp"
+#include "texture.hpp"
 
 class Object;
 

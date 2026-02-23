@@ -8,6 +8,8 @@ Model::Model(const std::string& path)
 
     std::vector<glm::vec3> tempVertices;
     std::vector<unsigned int> indices;
+    std::vector<glm::vec2> tempTexCoords;
+    std::vector<unsigned int> texIndices;
 
     std::string line;
 
@@ -23,25 +25,55 @@ Model::Model(const std::string& path)
             ss >> vertex.x >> vertex.y >> vertex.z;
             tempVertices.push_back(vertex);
         }
+        else if (prefix == "vt")
+        {
+            glm::vec2 tex;
+            ss >> tex.x >> tex.y;
+            tempTexCoords.push_back(tex);
+        }
         else if (prefix == "f")
         {
-            unsigned int a, b, c;
-            ss >> a >> b >> c;
+            std::string v1, v2, v3;
+            ss >> v1 >> v2 >> v3;
 
-            indices.push_back(a - 1);
-            indices.push_back(b - 1);
-            indices.push_back(c - 1);
+            auto parseVertex = [&](std::string v)
+            {
+                std::replace(v.begin(), v.end(), '/', ' ');
+                std::stringstream vs(v);
+
+                unsigned int vi, ti;
+                vs >> vi >> ti;
+
+                return std::pair<unsigned int, unsigned int>(vi - 1, ti - 1);
+            };
+
+            auto p1 = parseVertex(v1);
+            auto p2 = parseVertex(v2);
+            auto p3 = parseVertex(v3);
+
+            indices.push_back(p1.first);
+            indices.push_back(p2.first);
+            indices.push_back(p3.first);
+
+            texIndices.push_back(p1.second);
+            texIndices.push_back(p2.second);
+            texIndices.push_back(p3.second);
         }
     }
 
     std::vector<float> vertices;
 
-    for (unsigned int index : indices)
+    for (size_t i = 0; i < indices.size(); i++)
     {
-        glm::vec3 v = tempVertices[index];
+        glm::vec3 v = tempVertices[indices[i]];
+        glm::vec2 t = tempTexCoords[texIndices[i]];
+
         vertices.push_back(v.x);
         vertices.push_back(v.y);
         vertices.push_back(v.z);
+
+        vertices.push_back(t.x);
+        vertices.push_back(t.y);
     }
 
     mesh = new Mesh(vertices.data(), vertices.size() * sizeof(float));

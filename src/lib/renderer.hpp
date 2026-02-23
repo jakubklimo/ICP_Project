@@ -32,7 +32,6 @@ class Renderer {
 
         static GLFWwindow* getWindow();
         static Camera* getCamera();
-        static Shader* getShader();
 
         static void toggleFullscreen();
         static void toggleVSync();
@@ -45,7 +44,6 @@ class Renderer {
     private:
         static GLFWwindow* window;
         static Camera* camera;
-        static Shader* shader;
 
         static bool fullscreen;
         static bool vsync;
@@ -55,6 +53,4 @@ class Renderer {
         static int savedPosY;
         static int savedWidth;
         static int savedHeight;
-
-        static GLint mvpLocation;
 };

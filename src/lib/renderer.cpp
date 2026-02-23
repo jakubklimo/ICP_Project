@@ -3,7 +3,6 @@
 
 GLFWwindow* Renderer::window = nullptr;
 Camera* Renderer::camera = nullptr;
-Shader* Renderer::shader = nullptr;
 
 static bool firstMouse = true;
 static float lastX = 400, lastY = 300;
@@ -16,8 +15,6 @@ int Renderer::savedPosX = 0;
 int Renderer::savedPosY = 0;
 int Renderer::savedWidth = 800;
 int Renderer::savedHeight = 600;
-
-GLint Renderer::mvpLocation = -1;
 
 void Renderer::toggleFullscreen()
 {
@@ -193,19 +190,6 @@ bool Renderer::init()
     float aspect = (float)width / (float)height;
     camera = new Camera(45.0f, aspect, 0.1f, 100.0f);
 
-    shader = new Shader(
-        "resources/shaders/vertex.glsl",
-        "resources/shaders/fragment.glsl"
-    );
-    shader->use();
-
-    mvpLocation = glGetUniformLocation(shader->getID(), "MVP");
-
-    if (mvpLocation == -1)
-    {
-        std::cout << "Warning: MVP uniform not found!" << std::endl;
-    }
-
     glViewport(0, 0, width, height);
 
     std::cout << "Renderer initialized, window created\n";
@@ -235,22 +219,19 @@ void Renderer::render()
     glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shader->use();
-
     glm::mat4 view = camera->getViewMatrix();
     glm::mat4 projection = camera->getProjectionMatrix();
 
     for (auto obj : World::getObjects())
     {
+        Shader* shader = obj->getMaterial()->getShader();
+
+        shader->use();
+
         glm::mat4 model = obj->getModelMatrix();
         glm::mat4 mvp = projection * view * model;
 
-        glUniformMatrix4fv(
-            mvpLocation,
-            1,
-            GL_FALSE,
-            glm::value_ptr(mvp)
-        );
+        glUniformMatrix4fv(glGetUniformLocation(shader->getID(), "MVP"), 1, GL_FALSE, glm::value_ptr(mvp));
 
         obj->draw();
     }
@@ -270,9 +251,6 @@ void Renderer::shutdown()
 {
     delete camera;
     camera = nullptr;
-
-    delete shader;
-    shader = nullptr;
 
     GUI::shutdown();
 
