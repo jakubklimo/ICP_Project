@@ -6,16 +6,16 @@ START = 100 points
 ## ESSENTIALS: Each missing (non-functional) Essential = -25 points (partial functionality => partial decrement)
 
 - [ ]  realtime 2D raster processing = tracker, constant quality video encoder (can be separate project) 
-- [ ]  multiple threads + synchronisation 
-- [ ]  3D GL Core profile + shaders version 4.6, enabled GL debug, used DSA (Direct State Access) 
-- [ ]  high performance => at least 60 FPS
+- [x]  multiple threads + synchronisation 
+- [x]  3D GL Core profile + shaders version 4.6, enabled GL debug, used DSA (Direct State Access) 
+- [x]  high performance => at least 60 FPS
 - [x]  allow VSync control, fullscreen vs. windowed switching (restore window position & size), screenshot, antialiasing toggle
 - [x]  simple GUI: display (at least) GL version, profile, FPS
 - [x]  event processing: camera, object, app behaviour etc. controlled by mouse (both axes, wheel), keyboard, window resize, etc.
 - [ ]  multiple different independently moving 3D models, at leats two loaded from file
 - [x]  free floating and first-person-view camera
 - [ ]  at least three different textures (or subtextures from texture atlas etc.)
-- [ ]  3D positional audio (multiple sources, background sound)
+- [x]  3D positional audio (multiple sources, background sound)
 
 ## EXTRAS: Each working Extra = +10 points
 

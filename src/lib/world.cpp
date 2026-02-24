@@ -6,8 +6,12 @@ ChunkManager World::chunkManager;
 
 static Material* terrainMaterial;
 static Material* cubeMaterial;
+static Material* coinMaterial;
+static Material* rockMaterial;
 
 static Model* cubeModel;
+static Model* coinModel;
+static Model* rockModel;
 
 std::set<std::pair<int,int>> World::loadedChunks;
 
@@ -20,11 +24,16 @@ void World::init()
 
     Texture* grass = new Texture("resources/textures/grass.png");
     Texture* brick = new Texture("resources/textures/brick.png");
+    Texture* rock = new Texture("resources/textures/tree.png");
 
     terrainMaterial = new Material(shader, grass);
     cubeMaterial    = new Material(shader, brick);
+    coinMaterial    = new Material(shader, brick);
+    rockMaterial    = new Material(shader, rock);
     
     cubeModel = new Model("resources/obj/cube.obj");
+    coinModel = new Model("resources/obj/coin.obj");
+    rockModel = new Model("resources/obj/tree.obj");
 
     chunkManager.start();
 
@@ -60,13 +69,46 @@ void World::update(float delta)
 
         if (type == 0)
         {
-            // krychle
             Object* cube = new Object(cubeModel, cubeMaterial);
-            cube->setPosition(glm::vec3(worldX, 1.0f, worldZ));
+
+            glm::vec3 pos(worldX, 1.0f, worldZ);
+            cube->setBasePosition(pos);
+
+            int animType = abs(seed ^ 0xABCDEF) % 3;
+            float offset = (seed % 100) * 0.1f;
+            float speed  = 0.5f + (abs(seed) % 50) / 100.0f;
+
+            cube->configureAnimation(animType, offset, speed);
+
+            int soundId = Audio::createSpatialSound( "resources/audio/levitation.mp3", pos, true);
+
+            cube->setSoundId(soundId);
+
             chunkObjects[key].push_back(cube);
+        }
+        else if (type == 1) {
+            Object* rock = new Object(rockModel, rockMaterial);
+
+            glm::vec3 pos(worldX, 0.0f, worldZ);
+            rock->setBasePosition(pos);
+
+            chunkObjects[key].push_back(rock);
         }
 
         delete chunk;
+    }
+
+    for (auto& [chunkKey, objects] : chunkObjects)
+    {
+        for (auto obj : objects)
+        {
+            obj->update(elapsedTime);
+
+            if (obj->getSoundId() != -1)
+            {
+                Audio::setSoundPosition(obj->getSoundId(), obj->getPosition());
+            }
+        }
     }
 }
 
@@ -77,7 +119,7 @@ void World::updateChunksAroundCamera()
     int chunkX = static_cast<int>(floor(camPos.x / 10.0f));
     int chunkZ = static_cast<int>(floor(camPos.z / 10.0f));
 
-    int radius = 5;
+    int radius = 2;
 
     removeFarChunks(chunkX, chunkZ, radius);
 

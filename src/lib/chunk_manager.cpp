@@ -76,12 +76,12 @@ void ChunkManager::workerLoop()
 
         chunk->vertices = {
             worldX, 0, worldZ, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            worldX+size, 0, worldZ, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
             worldX+size, 0, worldZ+size, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            worldX+size, 0, worldZ, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 
             worldX, 0, worldZ, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            worldX+size, 0, worldZ+size, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            worldX, 0, worldZ+size, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
+            worldX, 0, worldZ+size, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            worldX+size, 0, worldZ+size, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f
         };
 
         {

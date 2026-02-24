@@ -18,6 +18,7 @@ class Camera {
         void setAspect(float aspect);
 
         glm::vec3 getPosition() const;
+        glm::vec3 getFront() const;
 
     private:
         glm::vec3 position;

@@ -173,13 +173,35 @@ bool Renderer::init()
         return false;
     }
 
+    if (GLEW_KHR_debug)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+        glDebugMessageCallback(
+            [](GLenum source, GLenum type, GLuint id,
+            GLenum severity, GLsizei length,
+            const GLchar* message, const void* userParam)
+            {
+                std::cerr << "GL DEBUG: " << message << std::endl;
+            },
+            nullptr
+        );
+
+        std::cout << "OpenGL debug output enabled\n";
+    }
+    else
+    {
+        std::cout << "OpenGL debug output NOT supported on this system\n";
+    }
+
     GUI::init(window);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -224,6 +246,11 @@ void Renderer::render()
 
     glm::mat4 view = camera->getViewMatrix();
     glm::mat4 projection = camera->getProjectionMatrix();
+
+    Audio::updateListener(
+        camera->getPosition(),
+        camera->getFront()
+    );
 
     for (auto obj : World::getObjects())
     {

@@ -40,8 +40,11 @@ Model::Model(const std::string& path)
         }
         else if (prefix == "f")
         {
-            std::string v1, v2, v3;
-            ss >> v1 >> v2 >> v3;
+            std::vector<std::string> faceVertices;
+            std::string vStr;
+
+            while (ss >> vStr)
+                faceVertices.push_back(vStr);
 
             auto parseVertex = [&](std::string v)
             {
@@ -51,7 +54,11 @@ Model::Model(const std::string& path)
                 unsigned int vi = 0, ti = 0, ni = 0;
                 vs >> vi >> ti >> ni;
 
-                return std::tuple<unsigned int, unsigned int, unsigned int>(vi - 1, ti - 1, ni - 1);
+                return std::tuple<unsigned int, unsigned int, unsigned int>(
+                    vi - 1,
+                    ti > 0 ? ti - 1 : 0,
+                    ni > 0 ? ni - 1 : 0
+                );
             };
 
             auto process = [&](std::string vStr)
@@ -74,9 +81,13 @@ Model::Model(const std::string& path)
                 vertices.push_back(norm.z);
             };
 
-            process(v1);
-            process(v2);
-            process(v3);
+            // 🔥 triangulace fan metodou
+            for (size_t i = 1; i + 1 < faceVertices.size(); i++)
+            {
+                process(faceVertices[0]);
+                process(faceVertices[i]);
+                process(faceVertices[i + 1]);
+            }
         }
     }
 

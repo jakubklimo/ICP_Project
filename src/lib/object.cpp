@@ -14,6 +14,58 @@ void Object::setRotation(const glm::vec3& rot)
     rotation = rot;
 }
 
+void Object::update(float time)
+{
+    if (!animated)
+        return;
+
+    float t = time * animationSpeed + animationOffset;
+
+    switch (animationType)
+    {
+        case 0: // levitace
+        {
+            float height = sin(t) * 0.5f;
+            position = basePosition + glm::vec3(0, height, 0);
+            break;
+        }
+
+        case 1: // rotace na místě
+        {
+            position = basePosition;
+            rotation.y = t;
+            break;
+        }
+
+        case 2: // kroužení
+        {
+            float radius = 1.0f;
+            position = basePosition + glm::vec3(cos(t) * radius, 0, sin(t) * radius);
+            rotation.y = t;
+            break;
+        }
+    }
+}
+
+void Object::setAnimated(bool value)
+{
+    animated = value;
+}
+
+void Object::configureAnimation(int type, float offset, float speed)
+{
+    animated = true;
+    animationType = type;
+    animationOffset = offset;
+    animationSpeed = speed;
+}
+
+void Object::setBasePosition(const glm::vec3& pos)
+{
+    basePosition = pos;
+    position = pos;
+}
+
 glm::mat4 Object::getModelMatrix() const
 {
     glm::mat4 model = glm::mat4(1.0f);
@@ -39,4 +91,19 @@ void Object::draw() const
 Material* Object::getMaterial() const
 {
     return material;
+}
+
+void Object::setSoundId(int id)
+{
+    soundId = id;
+}
+
+int Object::getSoundId() const
+{
+    return soundId;
+}
+
+glm::vec3 Object::getPosition() const
+{
+    return position;
 }

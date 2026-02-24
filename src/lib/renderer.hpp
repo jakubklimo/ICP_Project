@@ -16,6 +16,7 @@
 #include "object.hpp"
 #include "world.hpp"
 #include "gui.hpp"
+#include "audio.hpp"
 
 class Renderer {
     public:
