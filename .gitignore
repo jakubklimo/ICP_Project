@@ -12,7 +12,6 @@ Makefile
 
 # ===== Compiled binaries =====
 *.o
-*.obj
 *.so
 *.a
 *.dll
