@@ -12,9 +12,9 @@ START = 100 points
 - [x]  allow VSync control, fullscreen vs. windowed switching (restore window position & size), screenshot, antialiasing toggle
 - [x]  simple GUI: display (at least) GL version, profile, FPS
 - [x]  event processing: camera, object, app behaviour etc. controlled by mouse (both axes, wheel), keyboard, window resize, etc.
-- [ ]  multiple different independently moving 3D models, at leats two loaded from file
+- [x]  multiple different independently moving 3D models, at leats two loaded from file
 - [x]  free floating and first-person-view camera
-- [ ]  at least three different textures (or subtextures from texture atlas etc.)
+- [x]  at least three different textures (or subtextures from texture atlas etc.)
 - [x]  3D positional audio (multiple sources, background sound)
 
 ## EXTRAS: Each working Extra = +10 points

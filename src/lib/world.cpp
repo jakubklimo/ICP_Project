@@ -7,11 +7,11 @@ ChunkManager World::chunkManager;
 static Material* terrainMaterial;
 static Material* cubeMaterial;
 static Material* coinMaterial;
-static Material* rockMaterial;
+static Material* treeMaterial;
 
 static Model* cubeModel;
 static Model* coinModel;
-static Model* rockModel;
+static Model* treeModel;
 
 std::set<std::pair<int,int>> World::loadedChunks;
 
@@ -24,16 +24,17 @@ void World::init()
 
     Texture* grass = new Texture("resources/textures/grass.png");
     Texture* brick = new Texture("resources/textures/brick.png");
-    Texture* rock = new Texture("resources/textures/tree.png");
+    Texture* tree = new Texture("resources/textures/tree.png");
+    Texture* coin = new Texture("resources/textures/coin_alb.png");
 
     terrainMaterial = new Material(shader, grass);
     cubeMaterial    = new Material(shader, brick);
-    coinMaterial    = new Material(shader, brick);
-    rockMaterial    = new Material(shader, rock);
+    coinMaterial    = new Material(shader, coin);
+    treeMaterial    = new Material(shader, tree);
     
     cubeModel = new Model("resources/obj/cube.obj");
     coinModel = new Model("resources/obj/coin.obj");
-    rockModel = new Model("resources/obj/tree.obj");
+    treeModel = new Model("resources/obj/tree.obj");
 
     chunkManager.start();
 
@@ -61,7 +62,7 @@ void World::update(float delta)
         chunkObjects[key].push_back(terrain);
 
         int seed = chunk->x * 73856093 ^ chunk->z * 19349663;
-        int type = abs(seed) % 3;  // 0,1,2
+        int type = abs(seed) % 10;
 
         float size = 10.0f;
         float worldX = chunk->x * size + size * 0.5f;
@@ -80,19 +81,32 @@ void World::update(float delta)
 
             cube->configureAnimation(animType, offset, speed);
 
-            int soundId = Audio::createSpatialSound( "resources/audio/levitation.mp3", pos, true);
+            int soundId = Audio::createSpatialSound("resources/audio/levitation.mp3", pos, true);
 
             cube->setSoundId(soundId);
 
             chunkObjects[key].push_back(cube);
         }
         else if (type == 1) {
-            Object* rock = new Object(rockModel, rockMaterial);
+            Object* rock = new Object(treeModel, treeMaterial);
 
             glm::vec3 pos(worldX, 0.0f, worldZ);
             rock->setBasePosition(pos);
 
             chunkObjects[key].push_back(rock);
+        }
+        else if (type == 3) {
+            Object* coin = new Object(coinModel, coinMaterial);
+
+            glm::vec3 pos(worldX, 1.0f, worldZ);
+            coin->setBasePosition(pos);
+
+            float offset = (seed % 100) * 0.1f;
+            float speed  = 0.5f + (abs(seed) % 50) / 100.0f;
+
+            coin->configureAnimation(1, offset, speed);
+
+            chunkObjects[key].push_back(coin);
         }
 
         delete chunk;
@@ -106,7 +120,12 @@ void World::update(float delta)
 
             if (obj->getSoundId() != -1)
             {
-                Audio::setSoundPosition(obj->getSoundId(), obj->getPosition());
+                glm::vec3 camPos = Renderer::getCamera()->getPosition();
+                glm::vec3 objPos = obj->getPosition();
+
+                float dist = glm::distance(camPos, objPos);
+
+                Audio::setSoundPosition(obj->getSoundId(), objPos);
             }
         }
     }
@@ -119,7 +138,7 @@ void World::updateChunksAroundCamera()
     int chunkX = static_cast<int>(floor(camPos.x / 10.0f));
     int chunkZ = static_cast<int>(floor(camPos.z / 10.0f));
 
-    int radius = 2;
+    int radius = 5;
 
     removeFarChunks(chunkX, chunkZ, radius);
 

@@ -13,6 +13,8 @@ bool Audio::init()
         return false;
     }
 
+    ma_engine_listener_set_world_up(&engine, 0, 0.0f, 1.0f, 0.0f);
+
     std::cout << "Audio initialized\n";
     return true;
 }
@@ -67,7 +69,10 @@ int Audio::createSpatialSound(const std::string& path, const glm::vec3& position
     ma_sound_set_position(sound, position.x, position.y, position.z);
 
     ma_sound_set_min_distance(sound, 1.0f);
-    ma_sound_set_max_distance(sound, 50.0f);
+    ma_sound_set_max_distance(sound, 80.0f);
+    ma_sound_set_rolloff(sound, 2.0f);
+
+    ma_sound_set_attenuation_model(sound, ma_attenuation_model_inverse);
 
     ma_sound_set_looping(sound, loop);
     ma_sound_start(sound);
